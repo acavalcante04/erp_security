@@ -128,13 +128,18 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Configuração do Django Rest Framework (Seção 4.1)
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated', # Segurança por padrão: tudo bloqueado
-    ),
+    # Por padrão, apenas usuários autenticados podem acessar a API
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    # Configuração de Autenticação (Login)
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication', # Para testar no navegador
+        'rest_framework.authentication.BasicAuthentication',   # Para testes simples
+    ],
+    # Paginação (para não carregar 1000 produtos de uma vez no celular)
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
 # Configuração JWT (Seção 7.1)
@@ -153,3 +158,4 @@ print(f"--- DIAGNÓSTICO ---")
 print(f"DEBUG está valendo: {DEBUG}")
 print(f"SECRET_KEY começa com: {SECRET_KEY[:5]}...")
 print(f"-------------------")
+

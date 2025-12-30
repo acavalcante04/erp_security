@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Garantia - OS #{{ os.id }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        body {
+            font-family: sans-serif;
+            font-size: 9pt; /* Fonte um pouco menor pois o texto é longo */
+            color: #000;
+            line-height: 1.3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        /* Caixas e Bordas */
+        .box {
+            border: 1px solid #000;
+            border-radius: 5px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+            padding: 5px;
+        }
+
+        .title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14pt;
+            margin: 10px 0;
+            text-transform: uppercase;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+
+        /* Texto Jurídico */
+        .termos-texto {
+            font-size: 8.5pt;
+            text-align: justify;
+            margin-bottom: 15px;
+        }
+        .termos-texto p {
+            margin-bottom: 6px;
+        }
+
+        /* Tabela de Produtos */
+        .items-table th {
+            border: 1px solid #000;
+            background-color: #eee;
+            text-align: center;
+            font-weight: bold;
+            padding: 4px;
+            font-size: 8pt;
+        }
+        .items-table td {
+            border: 1px solid #000;
+            padding: 4px;
+            font-size: 9pt;
+        }
+
+        .label { font-weight: bold; font-size: 8pt; }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <table class="header-table">
+            <tr>
+                <td width="20%" style="text-align: center;">
+                    {% if config.logo %}
+                        <img src="{{ config.logo.url }}" style="max-height: 70px; max-width: 100%;">
+                    {% else %}
+                        <b>SEM LOGO</b>
+                    {% endif %}
+                </td>
+                <td width="80%" style="text-align: center;">
+                    <b style="font-size: 12pt;">{{ config.nome_empresa }}</b><br>
+                    {{ config.endereco_completo }}<br>
+                    CNPJ: {{ config.cnpj }}<br>
+                    {{ config.contato_telefone }} | {{ config.contato_email }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="title">TERMO DE GARANTIA</div>
+
+    <div class="box">
+        <table>
+            <tr>
+                <td width="60%"><span class="label">CLIENTE:</span> {{ os.cliente.nome }}</td>
+                <td width="40%"><span class="label">CPF/CNPJ:</span> {{ os.cliente.cpf_cnpj }}</td>
+            </tr>
+            <tr>
+                <td><span class="label">ENDEREÇO:</span> {{ os.cliente.endereco }}</td>
+                <td><span class="label">TELEFONE:</span> {{ os.cliente.telefone }}</td>
+            </tr>
+            <tr>
+                <td><span class="label">TÉCNICO RESPONSÁVEL:</span> {{ os.tecnico.get_full_name|default:os.tecnico.username }}</td>
+                <td><span class="label">DATA DO SERVIÇO:</span> {{ os.data_finalizacao|default:os.data_abertura|date:"d/m/Y" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="termos-texto">
+        <p><strong>INFORMAÇÕES COMPLEMENTARES AO TERMO DE GARANTIA</strong></p>
+
+        <p>1. Este termo refere-se à garantia contratual, complementar à garantia legal prevista no Código de Defesa do Consumidor (Lei nº 8.078/90), não excluindo nem substituindo os direitos legais do consumidor.</p>
+
+        <p>2. A garantia cobre exclusivamente defeitos de fabricação dos produtos e falhas de montagem ou instalação realizadas pela empresa, desde que o uso do equipamento ocorra conforme suas especificações técnicas e finalidade original.</p>
+
+        <p>3. <strong>Exclusões:</strong> A garantia não cobre danos decorrentes de mau uso, quedas, impactos, agentes da natureza, oscilações ou falhas na rede elétrica, instalações elétricas inadequadas, alterações estruturais no local, desgaste natural, nem problemas causados por produtos ou serviços de terceiros.</p>
+
+        <p>4. Qualquer intervenção, violação, manutenção ou alteração realizada por terceiros não autorizados acarretará a perda automática da garantia.</p>
+
+        <p>5. Não estão inclusos na garantia serviços adicionais como deslocamento técnico fora da área de atendimento padrão, reconfigurações solicitadas pelo cliente, mudança de local de instalação, treinamentos adicionais ou ajustes decorrentes de modificações no ambiente.</p>
+
+        <p>6. É de responsabilidade do cliente manter o equipamento em condições adequadas de uso, garantir alimentação elétrica compatível, preservar a integridade do produto e comunicar imediatamente qualquer irregularidade.</p>
+
+        <p>7. Para acionamento da garantia, o cliente deverá apresentar este termo e permitir a análise técnica. Constatada a cobertura, a empresa terá o prazo de até 30 (trinta) dias para solução, conforme previsto em lei.</p>
+
+        <p>8. A responsabilidade da empresa limita-se ao reparo ou substituição do produto ou serviço, não abrangendo perdas indiretas, lucros cessantes ou danos decorrentes de fatores externos.</p>
+
+        <p>9. <strong>Pessoa Jurídica:</strong> Para clientes pessoa jurídica, a garantia aplica-se nos limites deste termo, não se caracterizando relação de consumo quando o produto ou serviço for utilizado como insumo da atividade econômica.</p>
+
+        <p>10. <strong>Acordos Específicos:</strong> A empresa poderá firmar contratos específicos que estabeleçam condições diferentes das previstas neste termo, desde que formalizadas por escrito, prevalecendo o acordado no instrumento específico.</p>
+
+        <p>11. Fica eleito o foro da comarca da sede da empresa para dirimir quaisquer dúvidas oriundas deste termo.</p>
+    </div>
+
+    <div class="box" style="border: none;">
+        <p style="font-weight: bold; margin-bottom: 5px;">RELAÇÃO DE EQUIPAMENTOS E PRAZOS DE GARANTIA:</p>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th width="10%">QTD</th>
+                    <th width="50%">DESCRIÇÃO DO PRODUTO / SERVIÇO</th>
+                    <th width="20%">Nº SÉRIE (SE HOUVER)</th>
+                    <th width="20%">GARANTIA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in itens %}
+                <tr>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td>
+                        {{ item.produto.nome }}
+                        <br><span style="font-size: 7pt; color: #555;">{{ item.produto.categoria.nome }}</span>
+                    </td>
+                    <td style="text-align: center;"> - </td>
+                    <td style="text-align: center;">
+                        {% if item.produto.tipo == 'SERVICO' %}
+                            30 Dias (Mão de Obra)
+                        {% else %}
+                            {{ item.produto.garantia_meses }} Meses
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 10px;">Nenhum item listado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 30px; page-break-inside: avoid;">
+        <table style="border: none;">
+            <tr>
+                <td style="border: none; text-align: center; width: 45%;">
+                    __________________________________________<br>
+                    <span style="font-size: 8pt;">{{ config.nome_empresa }}</span>
+                </td>
+                <td style="border: none; width: 10%;"></td>
+                <td style="border: none; text-align: center; width: 45%;">
+                    __________________________________________<br>
+                    <span style="font-size: 8pt;">{{ os.cliente.nome }}</span><br>
+                    <span style="font-size: 7pt;">Declaro ter recebido os produtos em perfeito estado e estar de acordo com os termos acima.</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

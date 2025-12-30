@@ -99,12 +99,12 @@ class OrcamentoAdmin(admin.ModelAdmin):
 
 
 class OrdemServicoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'cliente', 'tecnico', 'status', 'valor_total')
+    list_display = ('id', 'cliente', 'tecnico', 'status', 'valor_total', 'botao_imprimir')  # Adicionei o botão aqui
     list_filter = ('status', 'tecnico', 'data_abertura')
     search_fields = ('cliente__nome', 'descricao_problema', 'id')
     autocomplete_fields = ['cliente', 'tecnico']
 
-    readonly_fields = ('valor_bruto', 'valor_total', 'sincronizado')
+    readonly_fields = ('valor_bruto', 'valor_total', 'sincronizado', 'botao_imprimir_formulario')
 
     fieldsets = (
         ('Origem', {
@@ -116,12 +116,42 @@ class OrdemServicoAdmin(admin.ModelAdmin):
         ('Financeiro', {
             'fields': ('valor_bruto', 'desconto', 'valor_total')
         }),
+        ('Impressão', {  # Nova seção
+            'fields': ('botao_imprimir_formulario',)
+        }),
         ('Datas e Controle', {
             'fields': ('data_finalizacao', 'sincronizado'),
         }),
     )
 
+    def botao_imprimir(self, obj):
+        if obj.id:
+            url_os = reverse('os_pdf', args=[obj.id])
+            url_garantia = reverse('garantia_pdf', args=[obj.id])
 
+            # Cria dois botões um ao lado do outro
+            return format_html(
+                '''<a class="button" href="{}" target="_blank" style="background-color: #2c3e50; color: white; margin-right: 5px;">OS</a>
+                   <a class="button" href="{}" target="_blank" style="background-color: #27ae60; color: white;">Garantia</a>''',
+                url_os, url_garantia
+            )
+        return "-"
+
+    botao_imprimir.short_description = 'Imprimir'
+
+    def botao_imprimir_formulario(self, obj):
+        if obj.id:
+            url_os = reverse('os_pdf', args=[obj.id])
+            url_garantia = reverse('garantia_pdf', args=[obj.id])
+
+            return format_html(
+                '''<a class="button" href="{}" target="_blank">📄 Imprimir OS</a> &nbsp;&nbsp;
+                   <a class="button" href="{}" target="_blank" style="background-color: #27ae60;">🛡️ Imprimir Termo de Garantia</a>''',
+                url_os, url_garantia
+            )
+        return "Salve antes de imprimir"
+
+    botao_imprimir_formulario.short_description = 'Documentos'
 # 3. Registra tudo no final
 admin.site.register(Orcamento, OrcamentoAdmin)
 admin.site.register(OrdemServico, OrdemServicoAdmin)
