@@ -1,7 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from . import api_views # <--- Importante: Importe o arquivo novo
+# Certifique-se de ter criado o ficheiro api_views.py conforme o passo anterior
+from . import api_views
 
 # Configura o Roteador Automático da API
 router = DefaultRouter()
@@ -13,7 +14,7 @@ urlpatterns = [
     path('os/<int:pk>/pdf/', views.gerar_os_pdf, name='os_pdf'),
     path('os/<int:pk>/garantia/', views.gerar_garantia_pdf, name='garantia_pdf'),
 
-    # --- Rota da API (Para o Celular) ---
+    # --- Rota da API (Para o App/Mobile) ---
     # O endereço final será: http://SEU_IP:8000/servicos/api/ordens/
     path('api/', include(router.urls)),
 ]
