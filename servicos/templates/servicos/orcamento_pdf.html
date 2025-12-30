@@ -1,150 +1,173 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <title>Orçamento #{{ orcamento.id }}</title>
     <style>
-        /* CSS Otimizado para Impressão A4 */
         @page {
             size: A4;
-            margin: 2cm;
-            @bottom-center {
-                content: "Página " counter(page) " de " counter(pages);
-                font-family: sans-serif;
-                font-size: 9pt;
-            }
+            margin: 1cm; /* Margem pequena para aproveitar a folha */
         }
         body {
-            font-family: "Helvetica", sans-serif;
+            font-family: sans-serif; /* Fonte similar ao Arial */
             font-size: 10pt;
-            color: #333;
-            line-height: 1.4;
+            color: #000;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #2c3e50;
-            padding-bottom: 10px;
-        }
-        .header h1 {
-            margin: 0;
-            color: #2c3e50;
-            font-size: 18pt;
-            text-transform: uppercase;
-        }
-        .info-box {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        .info-box td {
-            vertical-align: top;
-            padding: 5px;
-        }
-        .label {
-            font-weight: bold;
-            color: #555;
-        }
-        table.itens {
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-bottom: 5px;
         }
-        table.itens th {
-            background-color: #eee;
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-            font-size: 9pt;
+
+        /* Estilo das Bordas arredondadas e caixas */
+        .box {
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 10px;
         }
-        table.itens td {
-            border: 1px solid #ccc;
-            padding: 8px;
+
+        /* Cabeçalho com Logo */
+        .header-table td {
+            vertical-align: middle;
+            padding: 5px;
         }
-        .total-box {
-            margin-top: 20px;
-            text-align: right;
-            font-size: 12pt;
-        }
-        .total-valor {
-            font-weight: bold;
-            font-size: 16pt;
-            color: #2c3e50;
-        }
-        .footer {
-            margin-top: 50px;
-            font-size: 8pt;
-            color: #777;
+
+        /* Tabela de Itens (Estilo Planilha) */
+        .items-table th {
+            border: 1px solid #000;
+            background-color: #ddd;
             text-align: center;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
+            font-weight: bold;
+            padding: 4px;
+        }
+        .items-table td {
+            border: 1px solid #000;
+            padding: 4px;
+        }
+
+        /* Totais */
+        .total-table td {
+            padding: 5px;
+            border: 1px solid #000;
+        }
+
+        .label {
+            font-weight: bold;
+            font-size: 8pt;
+        }
+        .content {
+            font-size: 10pt;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>{{ empresa.nome }}</h1>
-        <p>Especialistas em Segurança Eletrônica</p>
-        <p>{{ empresa.telefone }} | {{ empresa.email }}</p>
+    <div class="box">
+        <table class="header-table">
+            <tr>
+                <td width="20%" style="text-align: center;">
+                    {% if config.logo %}
+                        <img src="{{ config.logo.url }}" style="max-height: 80px; max-width: 100%;">
+                    {% else %}
+                        <b>SEM LOGO</b>
+                    {% endif %}
+                </td>
+
+                <td width="60%" style="text-align: center;">
+                    <b style="font-size: 14pt;">{{ config.nome_empresa }}</b><br>
+                    <span style="font-size: 9pt;">
+                        {{ config.endereco_completo }}<br>
+                        CNPJ: {{ config.cnpj }}<br>
+                        {{ config.contato_telefone }} | {{ config.contato_email }}
+                    </span>
+                </td>
+
+                <td width="20%" style="text-align: center; border-left: 1px solid #000;">
+                    <div class="label">DATA</div>
+                    <div class="content">{{ orcamento.data_criacao|date:"d/m/Y" }}</div>
+                    <br>
+                    <div class="label">Nº ORÇAMENTO</div>
+                    <div class="content" style="font-size: 14pt; color: red;"><b>{{ orcamento.id }}</b></div>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <h2 style="text-align: center; margin-top: 0;">ORÇAMENTO #{{ orcamento.id }}</h2>
+    <div class="box">
+        <table>
+            <tr>
+                <td width="60%">
+                    <span class="label">CLIENTE:</span> {{ orcamento.cliente.nome }}
+                </td>
+                <td width="40%">
+                    <span class="label">CPF/CNPJ:</span> {{ orcamento.cliente.cpf_cnpj }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="label">ENDEREÇO:</span> {{ orcamento.cliente.endereco }}
+                </td>
+                <td>
+                    <span class="label">TEL:</span> {{ orcamento.cliente.telefone }}
+                </td>
+            </tr>
+        </table>
+    </div>
 
-    <table class="info-box">
-        <tr>
-            <td width="50%">
-                <span class="label">Cliente:</span><br>
-                {{ orcamento.cliente.nome }}<br>
-                {{ orcamento.cliente.cpf_cnpj }}<br>
-                {{ orcamento.cliente.telefone }}
-            </td>
-            <td width="50%" style="text-align: right;">
-                <span class="label">Data de Emissão:</span> {{ orcamento.data_criacao|date:"d/m/Y" }}<br>
-                <span class="label">Válido até:</span> {{ orcamento.validade|date:"d/m/Y" }}<br>
-                <span class="label">Status:</span> {{ orcamento.get_status_display }}
-            </td>
-        </tr>
-    </table>
-
-    <table class="itens">
+    <table class="items-table">
         <thead>
             <tr>
-                <th>Item / Serviço</th>
-                <th style="width: 80px; text-align: center;">Qtd</th>
-                <th style="width: 100px; text-align: right;">Unitário</th>
-                <th style="width: 100px; text-align: right;">Subtotal</th>
+                <th width="10%">QUANT</th>
+                <th width="50%">DESCRIÇÃO DO PRODUTO / SERVIÇO</th>
+                <th width="10%">UNID</th>
+                <th width="15%">UNIT (R$)</th>
+                <th width="15%">TOTAL (R$)</th>
             </tr>
         </thead>
         <tbody>
             {% for item in itens %}
             <tr>
-                <td>
-                    <b>{{ item.produto.nome }}</b><br>
-                    <small>{{ item.produto.categoria.nome }}</small>
-                </td>
                 <td style="text-align: center;">{{ item.quantidade }}</td>
-                <td style="text-align: right;">R$ {{ item.preco_unitario }}</td>
-                <td style="text-align: right;">R$ {{ item.subtotal }}</td>
+                <td>
+                    {{ item.produto.nome }}
+                    <br><span style="font-size: 8pt; color: #555;">{{ item.produto.referencia_fabricante }}</span>
+                </td>
+                <td style="text-align: center;">UN</td> <td style="text-align: right;">{{ item.preco_unitario }}</td>
+                <td style="text-align: right;">{{ item.subtotal }}</td>
             </tr>
             {% endfor %}
+
+            <tr><td colspan="5" style="height: 20px;"></td></tr>
         </tbody>
     </table>
 
-    <div class="total-box">
-        Valor Total:<br>
-        <span class="total-valor">R$ {{ orcamento.valor_total }}</span>
-    </div>
+    <table class="total-table" style="width: 50%; margin-left: auto;">
+        <tr>
+            <td style="background-color: #eee;"><b>TOTAL BRUTO</b></td>
+            <td style="text-align: right;">R$ {{ orcamento.valor_bruto }}</td>
+        </tr>
+        <tr>
+            <td style="background-color: #eee;"><b>DESCONTO</b></td>
+            <td style="text-align: right; color: red;">- R$ {{ orcamento.desconto }}</td>
+        </tr>
+        <tr>
+            <td style="background-color: #ccc; font-size: 12pt;"><b>TOTAL A PAGAR</b></td>
+            <td style="text-align: right; font-size: 12pt;"><b>R$ {{ orcamento.valor_total }}</b></td>
+        </tr>
+    </table>
 
     {% if orcamento.observacoes %}
-    <div style="margin-top: 30px; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9;">
-        <span class="label">Condições e Observações:</span><br>
-        {{ orcamento.observacoes|linebreaks }}
+    <div class="box" style="margin-top: 10px; font-size: 9pt;">
+        <b>OBSERVAÇÕES:</b><br>
+        {{ orcamento.observacoes|linebreaksbr }}
     </div>
     {% endif %}
 
-    <div class="footer">
-        <p>Este documento não vale como recibo de pagamento.</p>
-        <p>Gerado automaticamente em {{ orcamento.data_criacao|date:"d/m/Y H:i" }}</p>
+    <div style="margin-top: 50px; text-align: center;">
+        __________________________________________________<br>
+        Assinatura do Responsável
     </div>
 
 </body>

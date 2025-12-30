@@ -4,6 +4,7 @@ from django.urls import reverse
 from .models import Orcamento, ItemOrcamento, OrdemServico
 
 
+# 1. Primeiro definimos o Inline (Itens do Orçamento)
 class ItemOrcamentoInline(admin.TabularInline):
     model = ItemOrcamento
     extra = 1
@@ -11,21 +12,30 @@ class ItemOrcamentoInline(admin.TabularInline):
     readonly_fields = ('subtotal',)
 
 
+# 2. Depois definimos o Admin do Orçamento (que usa o Inline acima)
 class OrcamentoAdmin(admin.ModelAdmin):
-    # Adicionei 'botao_imprimir' na lista
-    list_display = ('id', 'cliente', 'validade', 'status', 'valor_total', 'botao_imprimir')
-
+    list_display = ('id', 'cliente', 'status', 'valor_bruto', 'desconto', 'valor_total', 'botao_imprimir')
     list_filter = ('status', 'validade')
     search_fields = ('cliente__nome', 'id')
-    inlines = [ItemOrcamentoInline]
+    inlines = [ItemOrcamentoInline]  # <--- Aqui ele chama a classe definida acima
     actions = ['marcar_aprovado', 'gerar_os']
 
-    # Adicionei 'botao_imprimir' aqui também para aparecer dentro do formulário
-    readonly_fields = ('valor_total', 'botao_imprimir_formulario')
+    readonly_fields = ('valor_bruto', 'valor_total', 'botao_imprimir_formulario')
 
-    # --- NOVO: Botão para a LISTA de orçamentos ---
+    fieldsets = (
+        ('Dados Básicos', {
+            'fields': ('cliente', 'validade', 'status', 'observacoes')
+        }),
+        ('Financeiro', {
+            'fields': ('valor_bruto', 'desconto', 'valor_total')
+        }),
+        ('Impressão', {
+            'fields': ('botao_imprimir_formulario',)
+        })
+    )
+
     def botao_imprimir(self, obj):
-        if obj.id:  # Só mostra se o orçamento já estiver salvo
+        if obj.id:
             url = reverse('orcamento_pdf', args=[obj.id])
             return format_html(
                 '<a class="button" href="{}" target="_blank" style="background-color: #79aec8; color: white; padding: 5px 10px; border-radius: 5px;">Imprimir PDF</a>',
@@ -35,7 +45,6 @@ class OrcamentoAdmin(admin.ModelAdmin):
 
     botao_imprimir.short_description = 'Ações'
 
-    # --- NOVO: Botão para DENTRO do formulário (enquanto edita) ---
     def botao_imprimir_formulario(self, obj):
         if obj.id:
             url = reverse('orcamento_pdf', args=[obj.id])
@@ -46,15 +55,6 @@ class OrcamentoAdmin(admin.ModelAdmin):
         return "Salve antes de imprimir"
 
     botao_imprimir_formulario.short_description = 'Versão para Impressão'
-
-    # ... (Mantenha seus métodos calcular_total_dinamico, marcar_aprovado, gerar_os e save_related iguais) ...
-    # Se quiser, posso colar eles aqui novamente para garantir.
-
-    def calcular_total_dinamico(self, obj):
-        total = sum(item.subtotal for item in obj.itens.all())
-        return f"R$ {total:.2f}"
-
-    calcular_total_dinamico.short_description = "Soma dos Itens"
 
     @admin.action(description='Aprovar Orçamentos Selecionados')
     def marcar_aprovado(self, request, queryset):
@@ -76,7 +76,11 @@ class OrcamentoAdmin(admin.ModelAdmin):
                 cliente=orcamento.cliente,
                 descricao_problema=f"Serviço derivado do Orçamento #{orcamento.id}. \nCondições: {orcamento.observacoes}",
                 status=OrdemServico.Status.PENDENTE,
-                tecnico=request.user
+                tecnico=request.user,
+                # Copia valores financeiros iniciais
+                valor_bruto=orcamento.valor_bruto,
+                desconto=orcamento.desconto,
+                valor_total=orcamento.valor_total
             )
 
             orcamento.status = Orcamento.Status.CONVERTIDO
@@ -87,29 +91,37 @@ class OrcamentoAdmin(admin.ModelAdmin):
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
         obj = form.instance
-        total = sum(item.subtotal for item in obj.itens.all())
-        obj.valor_total = total
+        # Recalcula bruto somando os itens
+        total_itens = sum(item.subtotal for item in obj.itens.all())
+        obj.valor_bruto = total_itens
+        # Salva novamente para acionar a lógica de (Bruto - Desconto = Total) do model
         obj.save()
 
 
 class OrdemServicoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'cliente', 'tecnico', 'status', 'data_abertura')
+    list_display = ('id', 'cliente', 'tecnico', 'status', 'valor_total')
     list_filter = ('status', 'tecnico', 'data_abertura')
     search_fields = ('cliente__nome', 'descricao_problema', 'id')
     autocomplete_fields = ['cliente', 'tecnico']
+
+    readonly_fields = ('valor_bruto', 'valor_total', 'sincronizado')
 
     fieldsets = (
         ('Origem', {
             'fields': ('orcamento_origem', 'cliente', 'tecnico')
         }),
-        ('Status e Execução', {
+        ('Execução', {
             'fields': ('status', 'descricao_problema', 'laudo_tecnico')
         }),
-        ('Datas', {
-            'fields': ('data_finalizacao',),
+        ('Financeiro', {
+            'fields': ('valor_bruto', 'desconto', 'valor_total')
+        }),
+        ('Datas e Controle', {
+            'fields': ('data_finalizacao', 'sincronizado'),
         }),
     )
 
 
+# 3. Registra tudo no final
 admin.site.register(Orcamento, OrcamentoAdmin)
 admin.site.register(OrdemServico, OrdemServicoAdmin)
