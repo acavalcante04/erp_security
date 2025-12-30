@@ -1,3 +1,4 @@
+from decimal import Decimal  # <--- IMPORTAÇÃO ESSENCIAL NOVA
 from django.db import models
 from django.conf import settings
 from clientes.models import Cliente
@@ -5,11 +6,6 @@ from estoque.models import Produto
 
 
 class Orcamento(models.Model):
-    """
-    Seção 9.4: Orçamentos.
-    Atualizado para suportar Descontos e Totais Líquidos.
-    """
-
     class Status(models.TextChoices):
         RASCUNHO = 'RASCUNHO', 'Rascunho'
         ENVIADO = 'ENVIADO', 'Enviado ao Cliente'
@@ -27,7 +23,6 @@ class Orcamento(models.Model):
         default=Status.RASCUNHO
     )
 
-    # --- NOVOS CAMPOS FINANCEIROS ---
     valor_bruto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Total dos Itens')
     desconto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Desconto (R$)')
     valor_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Total Líquido')
@@ -35,8 +30,14 @@ class Orcamento(models.Model):
     observacoes = models.TextField(blank=True, verbose_name='Condições de Pagamento / Obs')
 
     def save(self, *args, **kwargs):
-        # Lógica Automática: Total Líquido = Bruto - Desconto
-        self.valor_total = self.valor_bruto - self.desconto
+        # CORREÇÃO DO ERRO: Converte tudo para Decimal antes de calcular
+        val_bruto = Decimal(str(self.valor_bruto or 0))
+        val_desc = Decimal(str(self.desconto or 0))
+
+        self.valor_bruto = val_bruto
+        self.desconto = val_desc
+        self.valor_total = val_bruto - val_desc
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -44,9 +45,6 @@ class Orcamento(models.Model):
 
 
 class ItemOrcamento(models.Model):
-    """
-    Itens individuais do orçamento (Produtos ou Serviços).
-    """
     orcamento = models.ForeignKey(Orcamento, on_delete=models.CASCADE, related_name='itens')
     produto = models.ForeignKey(Produto, on_delete=models.PROTECT, verbose_name='Produto/Serviço')
 
@@ -55,7 +53,10 @@ class ItemOrcamento(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
 
     def save(self, *args, **kwargs):
-        self.subtotal = self.quantidade * self.preco_unitario
+        # Garante cálculo com Decimal também nos itens
+        qtd = Decimal(str(self.quantidade))
+        preco = Decimal(str(self.preco_unitario))
+        self.subtotal = qtd * preco
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -63,11 +64,6 @@ class ItemOrcamento(models.Model):
 
 
 class OrdemServico(models.Model):
-    """
-    Seção 9.5: Ordem de Serviço (OS).
-    Atualizado para suportar Descontos e Totais.
-    """
-
     class Status(models.TextChoices):
         PENDENTE = 'PENDENTE', 'Aguardando Início'
         EM_ANDAMENTO = 'ANDAMENTO', 'Em Execução'
@@ -96,7 +92,6 @@ class OrdemServico(models.Model):
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDENTE)
 
-    # --- NOVOS CAMPOS FINANCEIROS NA OS ---
     valor_bruto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Total Serviço/Peças')
     desconto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Desconto (R$)')
     valor_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Total Final')
@@ -106,8 +101,14 @@ class OrdemServico(models.Model):
     sincronizado = models.BooleanField(default=True, editable=False)
 
     def save(self, *args, **kwargs):
-        # Lógica Automática: Total Final = Bruto - Desconto
-        self.valor_total = self.valor_bruto - self.desconto
+        # CORREÇÃO DO ERRO: Mesma proteção para a OS
+        val_bruto = Decimal(str(self.valor_bruto or 0))
+        val_desc = Decimal(str(self.desconto or 0))
+
+        self.valor_bruto = val_bruto
+        self.desconto = val_desc
+        self.valor_total = val_bruto - val_desc
+
         super().save(*args, **kwargs)
 
     def __str__(self):
