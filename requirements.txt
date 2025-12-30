@@ -1,0 +1,20 @@
+# Framework Web Principal (Seção 4.1)
+Django>=5.0,<6.0
+
+# API REST e Autenticação (Seção 4.1)
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+django-filter
+Markdown
+
+# Banco de Dados PostgreSQL (Seção 4.2)
+# Usando binary para facilitar a instalação em ambiente de desenvolvimento
+psycopg2-binary
+
+# Geração de PDF e Relatórios (Seção 4.5)
+weasyprint
+Pillow
+
+# Gerenciamento de Variáveis de Ambiente (Segurança - Seção 7)
+python-dotenv
