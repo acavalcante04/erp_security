@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Ordens de Serviço{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Ordens de Serviço</h2>
+    <table style="width:100%; border-collapse: collapse; color: var(--text-main); margin-top: 20px;">
+        <thead>
+            <tr style="border-bottom: 1px solid var(--border); text-align: left;">
+                <th style="padding:10px;">ID</th>
+                <th style="padding:10px;">Cliente</th>
+                <th style="padding:10px;">Status</th>
+                <th style="padding:10px;">Data</th>
+                <th style="padding:10px;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for os in ordens %}
+            <tr style="border-bottom: 1px solid #333;">
+                <td style="padding:10px;">#{{ os.id }}</td>
+                <td style="padding:10px;">{{ os.cliente.nome }}</td>
+                <td style="padding:10px;">
+                    <span style="padding: 4px 8px; border-radius: 4px; background: #333; font-size: 0.8rem;">
+                        {{ os.get_status_display }}
+                    </span>
+                </td>
+                <td style="padding:10px;">{{ os.data_abertura|date:"d/m/Y" }}</td>
+                <td style="padding:10px;">
+                    <a href="{% url 'os_pdf' os.id %}" target="_blank" style="color: var(--primary);">PDF</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

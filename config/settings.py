@@ -159,3 +159,6 @@ print(f"DEBUG está valendo: {DEBUG}")
 print(f"SECRET_KEY começa com: {SECRET_KEY[:5]}...")
 print(f"-------------------")
 
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'login'

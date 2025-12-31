@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SegSistem | ERP</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Paleta do SegSistem.pdf */
+            --bg-body: #121214;
+            --bg-surface: #202024;
+            --primary: #007bff;
+            --text-main: #e1e1e6;
+            --text-muted: #a8a8b3;
+            --border: #323238;
+            --radius: 8px;
+            --sidebar-width: 260px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-width); background-color: var(--bg-surface); border-right: 1px solid var(--border); position: fixed; height: 100%; display: flex; flex-direction: column; padding: 20px 10px; }
+        .brand { font-size: 1.5rem; font-weight: 700; color: var(--primary); text-align: center; margin-bottom: 40px; letter-spacing: 1px; }
+
+        /* Menu */
+        .menu-item { display: flex; align-items: center; padding: 12px 16px; color: var(--text-muted); text-decoration: none; border-radius: var(--radius); margin-bottom: 8px; transition: 0.2s; font-weight: 500; }
+        .menu-item:hover, .menu-item.active { background-color: var(--primary); color: white; }
+        .menu-item i { margin-right: 12px; font-size: 22px; }
+
+        /* Conteúdo */
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 30px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .page-title { font-size: 1.5rem; font-weight: 600; }
+
+        /* Cards */
+        .card { background: var(--bg-surface); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">SegSistem</div>
+        <nav>
+           <a href="{% url 'dashboard' %}" class="menu-item ...">
+    <i class="material-icons-round">dashboard</i> Dashboard
+</a>
+
+<a href="{% url 'cliente_list' %}" class="menu-item"> <i class="material-icons-round">people</i> Clientes
+</a>
+
+<a href="{% url 'os_list' %}" class="menu-item"> <i class="material-icons-round">build</i> Ordens de Serviço
+</a>
+
+<a href="{% url 'orcamento_list' %}" class="menu-item"> <i class="material-icons-round">request_quote</i> Orçamentos
+</a>
+
+<a href="{% url 'produto_list' %}" class="menu-item"> <i class="material-icons-round">inventory_2</i> Estoque
+</a>
+            <form action="{% url 'logout' %}" method="post" style="margin-top: auto;">
+                {% csrf_token %}
+                <button type="submit" class="menu-item" style="background:none; border:none; width:100%; color:#e83f5b; cursor:pointer;">
+                    <i class="material-icons-round">logout</i> Sair
+                </button>
+            </form>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="topbar">
+            <h1 class="page-title">{% block title %}Dashboard{% endblock %}</h1>
+            <div>
+                <strong>{{ user.get_full_name|default:user.username }}</strong>
+                <small style="color: var(--text-muted); display:block;">{{ user.get_role_display }}</small>
+            </div>
+        </div>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

@@ -4,6 +4,16 @@ from . import views
 # Certifique-se de ter criado o ficheiro api_views.py conforme o passo anterior
 from . import api_views
 
+urlpatterns = [
+    # Listas (Telas do Site)
+    path('os/', views.os_list, name='os_list'),
+    path('orcamentos/', views.orcamento_list, name='orcamento_list'),
+
+    # ... (Mantenha as rotas de PDF e API que já existiam) ...
+    path('orcamento/<int:pk>/pdf/', views.gerar_orcamento_pdf, name='orcamento_pdf'),
+    # ...
+]
+
 # Configura o Roteador Automático da API
 router = DefaultRouter()
 router.register(r'ordens', api_views.OrdemServicoViewSet, basename='api_os')

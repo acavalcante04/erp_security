@@ -7,6 +7,18 @@ from core.models import ConfiguracaoSistema
 from .models import Orcamento, OrdemServico
 
 
+@login_required
+def os_list(request):
+    ordens = OrdemServico.objects.all().order_by('-data_abertura')
+    return render(request, 'servicos/os_list.html', {'ordens': ordens})
+
+
+@login_required
+def orcamento_list(request):
+    orcamentos = Orcamento.objects.all().order_by('-data_criacao')
+    return render(request, 'servicos/orcamento_list.html', {'orcamentos': orcamentos})
+
+
 @staff_member_required
 def gerar_orcamento_pdf(request, pk):
     orcamento = get_object_or_404(Orcamento, pk=pk)
@@ -96,3 +108,4 @@ def gerar_garantia_pdf(request, pk):
     response['Content-Disposition'] = f'inline; filename="{filename}"'
 
     return response
+
